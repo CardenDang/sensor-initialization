@@ -1,27 +1,18 @@
-import { Link } from "react-router-dom";
-
-
-function Home() {
-    return(
-        <main className="home">
-            {/* Homepage will have data visualizations and graphs */}
-            <h1 className="header">
-                Sleep Quality Monitor
-            </h1>
-
-            {/* Data page will display raw data, similar to Excel file */}
-            <section className="home-sections">
-                <Link to="/data" className="data-btn">
-                    Data
-                </Link>
-
-            {/* Dashboard page has ML model results, optimal sleep results, suggwstions, and overview of user's sleep */}
-                <Link to="/dashboard" className="dashboard-btn">
-                    Dashboard
-                </Link>
-            </section>
-        </main>
-    );
+﻿import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ScatterChart, Scatter, BarChart, Bar, Legend, LineChart, Line } from 'recharts';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+import ChartCard from '@/components/ChartCard';
+import { nightly, heartRate } from '@/lib/demoData';
+const tip = {backgroundColor:'#191a2c',border:'1px solid #2a2b3d',borderRadius:8,color:'#fff',fontSize:12};
+const axis = {stroke:'#85869e',fontSize:12,tickLine:false,axisLine:false};
+export default function Home() {
+  return <div className="page"><div className="page-heading"><h1>Sleep Overview</h1><p>Weekly sleep quality summary · last 7 nights</p></div>
+    <div className="overview-metrics">{[['Sleep Score','82','/100','+4.2%'],['Avg Duration','7.3','h','+1.1%'],['Efficiency','91.4','%','-0.6%'],['Deep Sleep','1.4','h','+2.3%']].map(([label,value,unit,change])=><section className="overview-metric" key={label}><p>{label}</p><div className="metric-value">{value}<span>{unit}</span></div><div className={change.startsWith('-')?'metric-change negative':'metric-change'}>{change.startsWith('-')?<TrendingDown size={14}/>:<TrendingUp size={14}/>}<strong>{change}</strong><span>vs last week</span></div></section>)}</div>
+    <div className="overview-charts">
+      <ChartCard title="Nightly Sleep Score" subtitle="Score vs target baseline (80)"><ResponsiveContainer width="100%" height={275}><AreaChart data={nightly} margin={{top:10,right:5,left:-15,bottom:0}}><defs><linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#818cf8" stopOpacity={0.32}/><stop offset="100%" stopColor="#818cf8" stopOpacity={0.02}/></linearGradient></defs><CartesianGrid stroke="#28293a" strokeDasharray="3 3" vertical={false}/><XAxis {...axis} dataKey="day"/><YAxis {...axis} domain={[40,100]} ticks={[40,55,70,85,100]}/><Tooltip contentStyle={tip}/><Area type="monotone" dataKey="score" stroke="#8585ff" strokeWidth={2.4} fill="url(#scoreGradient)"/></AreaChart></ResponsiveContainer></ChartCard>
+      <ChartCard title="Heart Rate During Sleep" subtitle="BPM scatter across the night"><ResponsiveContainer width="100%" height={275}><ScatterChart margin={{top:10,right:10,left:-15,bottom:0}}><CartesianGrid stroke="#28293a" strokeDasharray="3 3"/><XAxis {...axis} type="number" dataKey="hour" domain={[0,8]} ticks={[0,2,4,6,8]}/><YAxis {...axis} type="number" dataKey="bpm" domain={[45,70]} ticks={[45,52,59,70]}/><Tooltip contentStyle={tip} cursor={{strokeDasharray:'3 3'}}/><Scatter name="Heart rate" data={heartRate} fill="#baff43"/></ScatterChart></ResponsiveContainer></ChartCard>
+    </div><div className="secondary-charts">
+      <ChartCard title="Sleep Stage Distribution" subtitle="Hours per stage per night"><ResponsiveContainer width="100%" height={270}><BarChart data={nightly}><CartesianGrid stroke="#28293a" strokeDasharray="3 3" vertical={false}/><XAxis {...axis} dataKey="day"/><YAxis {...axis} domain={[0,12]}/><Tooltip contentStyle={tip}/><Legend iconType="circle"/><Bar dataKey="deep" stackId="sleep" fill="#818cf8"/><Bar dataKey="rem" stackId="sleep" fill="#baff43"/><Bar dataKey="light" stackId="sleep" fill="#46466d"/><Bar dataKey="awake" stackId="sleep" fill="#ff9a33" radius={[3,3,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
+      <ChartCard title="Sleep Score Trend" subtitle="7-day rolling quality"><ResponsiveContainer width="100%" height={270}><LineChart data={nightly}><CartesianGrid stroke="#28293a" strokeDasharray="3 3" vertical={false}/><XAxis {...axis} dataKey="day"/><YAxis {...axis} domain={[40,100]}/><Tooltip contentStyle={tip}/><Line type="monotone" dataKey="score" stroke="#baff43" strokeWidth={2.5} dot={{r:3}}/></LineChart></ResponsiveContainer></ChartCard>
+    </div><p className="demo-note">Sample data · local preview</p>
+  </div>;
 }
-
-export default Home;
