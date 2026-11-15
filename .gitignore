@@ -3,3 +3,9 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# Receiver credentials, local readings, and Python environment
+.env.server
+.venv/
+data/
+__pycache__/

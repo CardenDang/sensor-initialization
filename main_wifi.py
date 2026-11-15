@@ -9,7 +9,9 @@ TEMPERATURE_OFFSET_C = -3.5
 # ---------------- WIFI CONFIG ----------------
 WIFI_SSID = "TP-Link_F2A8"
 WIFI_PASSWORD = "76577826"
-SERVER_URL = "http://192.168.0.126:5000/log"   # <-- set to your PC's IP + port (see server.py)
+SERVER_URL = "https://conjuror-dictation-factor.ngrok-free.dev/log"
+SENSOR_INGEST_TOKEN = "T1p-PM8UiQ10BW9Lf8ykmiNhpqLIVbqNpNJ2CSo3Lp8"  # Match SENSOR_INGEST_TOKEN in the receiving PC's .env.server.
+# For the public tunnel, SERVER_URL = "https://conjuror-dictation-factor.ngrok-free.dev/log"
 # ----------------------------------------------
 
 # ---- Pin setup ----
@@ -125,7 +127,10 @@ while True:
             "sound_level": sound_level,
         }
         try:
-            response = urequests.post(SERVER_URL, json=payload)
+            response = urequests.post(SERVER_URL, json=payload,
+                                      headers={"X-Sensor-Token": SENSOR_INGEST_TOKEN})
+            if response.status_code >= 400:
+                print("Server rejected reading, HTTP", response.status_code)
             response.close()
         except Exception as e:
             print("Failed to send data:", e)
