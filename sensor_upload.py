@@ -44,7 +44,14 @@ class UploadQueue:
         parsed = urlparse(url)
         if parsed.scheme != 'https' or not parsed.hostname or parsed.query or parsed.fragment:
             raise ValueError('SUPABASE_URL must be an HTTPS project URL.')
-        self.user_id = str(UUID(user_id))
+        try:
+            self.user_id = str(UUID(user_id.strip()))
+        except (ValueError, AttributeError):
+            raise ValueError(
+                'SENSOR_OWNER_USER_ID in .env.server must be the account User UID '
+                'from Supabase > Authentication > Users. Replace the placeholder '
+                'with that UUID (not an email address or API key).'
+            ) from None
         self.path = str(path)
         self.url = url.rstrip('/') + '/rest/v1/sleep_records?on_conflict=id'
         self.headers = {'apikey': key, 'Content-Type': 'application/json',

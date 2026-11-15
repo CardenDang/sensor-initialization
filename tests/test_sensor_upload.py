@@ -1,11 +1,16 @@
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 from urllib.error import URLError
 from sensor_upload import UploadQueue, sensor_values
-import server
+with patch('dotenv.load_dotenv'), patch.dict(os.environ, {
+    'SUPABASE_URL': '', 'SUPABASE_SECRET_KEY': '',
+    'SENSOR_OWNER_USER_ID': '', 'SENSOR_INGEST_TOKEN': '',
+}):
+    import server
 
 OWNER = '11111111-1111-4111-8111-111111111111'
 READING = {'air_quality': 123, 'lux': 0, 'temperature_c': -2, 'humidity_pct': 50, 'sound_level': 42}
@@ -16,6 +21,10 @@ class Response:
     def __exit__(self, *args): return False
 
 class UploadTests(unittest.TestCase):
+    def test_invalid_owner_gives_configuration_instructions(self):
+        with self.assertRaisesRegex(ValueError, 'SENSOR_OWNER_USER_ID.*User UID'):
+            UploadQueue('unused.sqlite', 'https://example.supabase.co', 'sb_secret_test', 'YOUR_ACCOUNT_UUID')
+
     def test_retry_survives_restart_and_preserves_id_and_owner(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'queue.sqlite'
